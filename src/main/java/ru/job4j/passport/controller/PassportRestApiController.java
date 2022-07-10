@@ -57,8 +57,24 @@ public class PassportRestApiController {
     }
 
     @GetMapping(value = "/find", params = "series")
-    public ResponseEntity<Passport> findBySeries(@Valid @RequestParam String series) {
-        return rest.exchange(FIND_API + "?series=" + series, HttpMethod.GET, null, Passport.class);
+    public ResponseEntity<List<Passport>> findBySeries(@Valid @RequestParam String series) {
+        List<Passport> passports = rest.exchange(
+                FIND_API + "?series" + series, HttpMethod.GET, null, new ParameterizedTypeReference<List<Passport>>() { }
+        ).getBody();
+        return new ResponseEntity<>(
+                passports, passports == null ? HttpStatus.NOT_FOUND : HttpStatus.OK
+        );
+    }
+
+    @GetMapping(value = "/find", params = "number")
+    public ResponseEntity<Passport> findByNumber(@Valid @RequestParam String number) {
+        return rest.exchange(FIND_API + "?number=" + number, HttpMethod.GET, null, Passport.class);
+    }
+
+    @GetMapping(value = "/find", params = {"series", "number"})
+    public ResponseEntity<Passport> findByNumber(@Valid @RequestParam String series, String number) {
+        return rest.exchange(FIND_API + "?series= " + series + "&number=" + number,
+                HttpMethod.GET, null, Passport.class);
     }
 
     @GetMapping(value = "/find", params = "id")

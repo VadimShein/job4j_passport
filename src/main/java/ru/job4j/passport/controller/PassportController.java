@@ -11,8 +11,6 @@ import ru.job4j.passport.service.PassportService;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping("/passport")
@@ -31,40 +29,42 @@ public class PassportController {
 
     @PutMapping("/update")
     public ResponseEntity<Passport> update(@Valid @RequestParam int id, @RequestBody Passport passport) {
-        if (passportService.findById(id).isPresent()) {
             passport.setId(id);
-            return new ResponseEntity<>(passportService.save(passport), HttpStatus.CREATED);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(passportService.update(passport), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<Void> delete(@Valid @RequestParam int id) {
-        if (passportService.findById(id).isPresent()) {
             Passport passport = new Passport();
             passport.setId(id);
             this.passportService.delete(passport);
             return ResponseEntity.ok().build();
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/find")
     public ResponseEntity<List<Passport>> findAll() {
-        List<Passport> passports = StreamSupport.stream(
-                this.passportService.findAll().spliterator(), false
-        ).collect(Collectors.toList());
+        List<Passport> passports = passportService.findAll();
         return new ResponseEntity<>(
                 passports, passports.isEmpty() ? HttpStatus.NOT_FOUND : HttpStatus.OK
         );
     }
 
     @GetMapping(value = "/find", params = "series")
-    public ResponseEntity<Passport> findBySeries(@Valid @RequestParam int series) {
-        Optional<Passport> passport = passportService.findBySeries(series);
+    public List<Passport> findBySeries(@Valid @RequestParam int series) {
+        return passportService.findBySeries(series);
+    }
+
+    @GetMapping(value = "/find", params = "number")
+    public List<Passport> findByNumber(@Valid @RequestParam int number) {
+        return passportService.findByNumber(number);
+    }
+
+    @GetMapping(value = "/find", params = {"series", "number"})
+    public ResponseEntity<Passport> findBySeriesAndNumber(@Valid @RequestParam int series, int number) {
+       Optional<Passport> dbPassport = passportService.findBySeriesAndNumber(series, number);
         return new ResponseEntity<>(
-                passport.orElse(new Passport()),
-                passport.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
+                dbPassport.orElse(new Passport()),
+                dbPassport.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND
         );
     }
 
@@ -78,22 +78,12 @@ public class PassportController {
     }
 
     @GetMapping("/unavailable")
-    public ResponseEntity<List<Passport>> unavailable() {
-        List<Passport> passports = StreamSupport.stream(
-                this.passportService.findUnavailable().spliterator(), false
-        ).collect(Collectors.toList());
-        return new ResponseEntity<>(
-                passports, passports.isEmpty() ? HttpStatus.NOT_FOUND : HttpStatus.OK
-        );
+    public List<Passport> unavailable() {
+        return  passportService.findUnavailable();
     }
 
     @GetMapping("/replaceable")
-    public ResponseEntity<List<Passport>> replaceable() {
-        List<Passport> passports = StreamSupport.stream(
-                this.passportService.findReplaceable().spliterator(), false
-        ).collect(Collectors.toList());
-        return new ResponseEntity<>(
-                passports, passports.isEmpty() ? HttpStatus.NOT_FOUND : HttpStatus.OK
-        );
+    public List<Passport> replaceable() {
+        return passportService.findReplaceable();
     }
 }

@@ -9,7 +9,8 @@ import java.sql.Date;
 import java.util.Objects;
 
 @Entity
-@Table(name = "passports")
+@Table(name = "passports", uniqueConstraints = { @UniqueConstraint(name = "UniqueSeriesAndNumber",
+        columnNames = { "series", "number" }) })
 public class Passport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,6 +18,8 @@ public class Passport {
     private int id;
     @Min(value = 1000, message = "Series must contain at least four characters")
     private int series;
+    @Min(value = 1000, message = "Number must contain at least four characters")
+    private int number;
     @NotBlank(message = "Name must be not empty")
     private String name;
     @NotBlank(message = "Surname must be not empty")
@@ -32,9 +35,10 @@ public class Passport {
 
     public Passport() { }
 
-    public Passport(int id, int series, String name, String surname, String patronymic, Date dateOfIssue, Date dueDate) {
-        this.id = id;
+    public Passport(int series, int number, String name, String surname,
+                    String patronymic, Date dateOfIssue, Date dueDate) {
         this.series = series;
+        this.number = number;
         this.name = name;
         this.surname = surname;
         this.patronymic = patronymic;
@@ -56,6 +60,14 @@ public class Passport {
 
     public void setSeries(int series) {
         this.series = series;
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
     }
 
     public String getName() {
@@ -109,6 +121,7 @@ public class Passport {
         Passport passport = (Passport) o;
         return id == passport.id
                 && series == passport.series
+                && number == passport.number
                 && name.equals(passport.name)
                 && surname.equals(passport.surname)
                 && patronymic.equals(passport.patronymic)
@@ -119,5 +132,19 @@ public class Passport {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Passport{"
+                + "id=" + id
+                + ", series=" + series
+                + ", number=" + number
+                + ", name='" + name + '\''
+                + ", surname='" + surname + '\''
+                + ", patronymic='" + patronymic + '\''
+                + ", dateOfIssue=" + dateOfIssue
+                + ", dueDate=" + dueDate
+                + '}';
     }
 }

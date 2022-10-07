@@ -16,7 +16,7 @@
     <name>job4j_passport</name>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>13</java.version>
     </properties>
 
     <dependencies>
